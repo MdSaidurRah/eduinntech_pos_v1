@@ -315,8 +315,10 @@ class Common
             $order->payment_status = $orderPaymentStatus;
             $order->save();
 
-            // Update Customer or Supplier total amount, due amount, paid amount
-            self::updateUserAmount($order->user_id, $order->warehouse_id);
+            // Drafts should not affect customer balance
+            if ($order->order_type != 'pos-drafts') {
+                self::updateUserAmount($order->user_id, $order->warehouse_id);
+            }
         }
     }
 
@@ -705,7 +707,7 @@ class Common
                 $totalQuantities += $orderItem->quantity;
 
                 // Tracking Stock History
-                if ($stockHistoryQuantity != 0 && $orderType != 'quotations') {
+                if ($stockHistoryQuantity != 0 && $orderType != 'quotations' && $orderType != 'pos-drafts') {
                     $stockHistory = new StockHistory();
                     $stockHistory->warehouse_id = $order->warehouse_id;
                     $stockHistory->product_id = $orderItem->product_id;
@@ -769,6 +771,7 @@ class Common
             'payment-out' => 'PAY-OUT-',
             'quotations' => 'QUOT-',
             'sales' => 'SALE-',
+            'pos-drafts' => 'DRAFT-',
             'purchases' => 'PUR-',
             'purchase-returns' => 'PUR-RET-',
             'sales-returns' => 'SALE-RET-',

@@ -12,12 +12,25 @@
                 >
                     <template #extra>
                         <span class="pos-header-extra">
+                            <a-badge
+                                :count="draftCount"
+                                :overflow-count="99"
+                                :offset="[-4, 4]"
+                            >
+                                <a-button @click="draftsVisible = true">
+                                    <FileTextOutlined />
+                                    {{ $t("stock.drafts") }}
+                                </a-button>
+                            </a-badge>
+                            <a-tag v-if="currentDraftXid" color="orange">
+                                {{ $t("stock.draft") }}
+                            </a-tag>
                             <span class="pos-header-date">
                                 {{ currentDate }}
                             </span>
                             <span
                                 v-if="innerWidth <= 768"
-                                style="display: flex"
+                                class="pos-header-customer"
                             >
                                 <a-select
                                     v-model:value="formData.user_id"
@@ -469,40 +482,18 @@
                                     :lg="10"
                                     :xl="10"
                                 >
-                                    <a-row
-                                        :gutter="16"
-                                        :style="{
-                                            background: '#dbdbdb',
-                                            padding: '5px',
-                                        }"
-                                    >
-                                        <a-col
-                                            :xs="24"
-                                            :sm="24"
-                                            :md="12"
-                                            :lg="12"
-                                            :xl="12"
-                                        >
-                                            <span class="pos-grand-total">
-                                                {{ $t("stock.grand_total") }} :
-                                            </span>
-                                        </a-col>
-                                        <a-col
-                                            :xs="24"
-                                            :sm="24"
-                                            :md="12"
-                                            :lg="12"
-                                            :xl="12"
-                                        >
-                                            <span class="pos-grand-total">
-                                                {{
-                                                    formatAmountCurrency(
-                                                        formData.subtotal
-                                                    )
-                                                }}
-                                            </span>
-                                        </a-col>
-                                    </a-row>
+                                    <div class="pos-total-box">
+                                        <span>{{
+                                            $t("stock.grand_total")
+                                        }}</span>
+                                        <strong>
+                                            {{
+                                                formatAmountCurrency(
+                                                    formData.subtotal
+                                                )
+                                            }}
+                                        </strong>
+                                    </div>
                                 </a-col>
                                 <a-col
                                     :xs="24"
@@ -512,7 +503,7 @@
                                     :xl="6"
                                     class="mt-10"
                                 >
-                                    <small>
+                                    <small class="pos-total-meta">
                                         {{ $t("product.tax") }} :
                                         {{
                                             formatAmountCurrency(
@@ -534,35 +525,33 @@
                                     :lg="8"
                                     :xl="8"
                                 >
-                                    <a-space>
+                                    <div class="pos-action-bar">
+                                        <a-button
+                                            @click="saveDraft"
+                                            :disabled="!isCartReady"
+                                        >
+                                            <SaveOutlined />
+                                            {{ $t("stock.save_draft") }}
+                                        </a-button>
                                         <a-button
                                             @click="viewQuote"
-                                            type="primary"
-                                            :disabled="
-                                                formData.subtotal <= 0 ||
-                                                formData.user_id == undefined ||
-                                                formData.user_id == '' ||
-                                                !formData.user_id
-                                            "
+                                            :disabled="!isCartReady"
                                         >
                                             {{ $t("stock.quote") }}
                                         </a-button>
                                         <a-button
                                             type="primary"
+                                            class="pos-btn-pay"
                                             @click="payNow"
-                                            :disabled="
-                                                formData.subtotal <= 0 ||
-                                                formData.user_id == undefined ||
-                                                formData.user_id == '' ||
-                                                !formData.user_id
-                                            "
+                                            :disabled="!isCartReady"
                                         >
+                                            <DollarCircleOutlined />
                                             {{ $t("stock.pay_now") }}
                                         </a-button>
-                                        <a-button @click="resetPos">
+                                        <a-button danger ghost @click="resetPos">
                                             {{ $t("stock.reset") }}
                                         </a-button>
-                                    </a-space>
+                                    </div>
                                 </a-col>
                             </a-row>
                         </div>
@@ -612,12 +601,13 @@
                         >
                             <ProductCardNew
                                 :product="item"
-                                :isAdded="
-                                    selectedProducts.some(
-                                        (p) => p.xid === item.xid
-                                    )
-                                "
+                                :isAdded="selectedProductIds.includes(item.xid)"
                             />
+                        </a-col>
+                    </a-row>
+                    <a-row v-else-if="productsLoading" justify="center">
+                        <a-col :span="24" style="text-align: center; padding: 40px">
+                            <a-spin />
                         </a-col>
                     </a-row>
                     <a-row v-else>
@@ -628,6 +618,18 @@
                             />
                         </a-col>
                     </a-row>
+                    <div
+                        v-if="productsHasMore"
+                        style="text-align: center; padding: 16px 0 32px"
+                    >
+                        <a-button
+                            type="primary"
+                            :loading="productsLoading"
+                            @click="loadMoreProducts"
+                        >
+                            {{ $t("common.load_more") }}
+                        </a-button>
+                    </div>
                 </perfect-scrollbar>
             </a-col>
         </a-row>
@@ -732,13 +734,23 @@
                                 <ProductCardNew
                                     :product="item"
                                     :isAdded="
-                                        selectedProducts.some(
-                                            (p) => p.xid === item.xid
-                                        )
+                                        selectedProductIds.includes(item.xid)
                                     "
                                 />
                             </a-col>
                         </a-row>
+                        <div
+                            v-if="productsHasMore"
+                            style="text-align: center; padding: 12px"
+                        >
+                            <a-button
+                                type="primary"
+                                :loading="productsLoading"
+                                @click="loadMoreProducts"
+                            >
+                                {{ $t("common.load_more") }}
+                            </a-button>
+                        </div>
                     </div>
                     <div v-if="showMobileCart">
                         <a-row class="mt-5 mb-5">
@@ -954,68 +966,44 @@
     </a-form>
 
     <div v-if="innerWidth <= 768" class="pos-mobile-footer">
-        <a-row :gutter="16">
-            <a-col :span="10">
-                <a-row :gutter="16" :style="{ padding: '10px' }">
-                    <a-col :span="24">
-                        <span class="pos-grand-total">
-                            {{ $t("common.total") }} :
-                            {{ formatAmountCurrency(formData.subtotal) }}
-                        </span>
-                    </a-col>
-                </a-row>
-            </a-col>
-            <a-col :span="14">
-                <a-space :style="{ marginTop: '5px' }">
-                    <a-button
-                        v-if="showMobileCart"
-                        @click="() => (showMobileCart = false)"
-                        type="primary"
-                    >
-                        <template #icon>
-                            <ShoppingCartOutlined />
-                        </template>
-                    </a-button>
-                    <a-button
-                        v-else
-                        @click="() => (showMobileCart = true)"
-                        type="primary"
-                    >
-                        <template #icon>
-                            <UnorderedListOutlined />
-                        </template>
-                    </a-button>
-                    <a-button
-                        @click="viewQuote"
-                        type="primary"
-                        :disabled="
-                            formData.subtotal <= 0 ||
-                            formData.user_id == undefined ||
-                            formData.user_id == '' ||
-                            !formData.user_id
-                        "
-                    >
-                        {{ $t("stock.quote") }}
-                    </a-button>
-                    <a-button
-                        type="primary"
-                        @click="payNow"
-                        :disabled="
-                            formData.subtotal <= 0 ||
-                            formData.user_id == undefined ||
-                            formData.user_id == '' ||
-                            !formData.user_id
-                        "
-                    >
-                        {{ $t("stock.pay_now") }}
-                    </a-button>
-
-                    <a-button @click="resetPos">
-                        {{ $t("stock.reset") }}
-                    </a-button>
-                </a-space>
-            </a-col>
-        </a-row>
+        <div class="pos-mobile-total">
+            {{ $t("common.total") }} :
+            {{ formatAmountCurrency(formData.subtotal) }}
+        </div>
+        <div class="pos-action-bar">
+            <a-button
+                v-if="showMobileCart"
+                @click="() => (showMobileCart = false)"
+                type="primary"
+            >
+                <template #icon>
+                    <ShoppingCartOutlined />
+                </template>
+            </a-button>
+            <a-button
+                v-else
+                @click="() => (showMobileCart = true)"
+                type="primary"
+            >
+                <template #icon>
+                    <UnorderedListOutlined />
+                </template>
+            </a-button>
+            <a-button @click="saveDraft" :disabled="!isCartReady">
+                <SaveOutlined />
+            </a-button>
+            <a-button
+                type="primary"
+                class="pos-btn-pay"
+                @click="payNow"
+                :disabled="!isCartReady"
+            >
+                {{ $t("stock.pay_now") }}
+            </a-button>
+            <a-button danger ghost @click="resetPos">
+                {{ $t("stock.reset") }}
+            </a-button>
+        </div>
     </div>
 
     <a-modal
@@ -1174,7 +1162,16 @@
         @closed="payNowClosed"
         @success="payNowSuccess"
         :data="formData"
+        :customers="customers"
         :selectedProducts="selectedProducts"
+        :draftXid="currentDraftXid"
+    />
+
+    <PosDrafts
+        :visible="draftsVisible"
+        @closed="draftsVisible = false"
+        @recalled="draftRecalled"
+        @countUpdated="(count) => (draftCount = count)"
     />
 
     <InvoiceModal
@@ -1185,7 +1182,7 @@
 </template>
 
 <script>
-import { ref, onMounted, reactive, toRefs, nextTick } from "vue";
+import { ref, onMounted, reactive, toRefs, nextTick, computed } from "vue";
 import {
     ShoppingCartOutlined,
     PlusOutlined,
@@ -1195,6 +1192,8 @@ import {
     SaveOutlined,
     SettingOutlined,
     UnorderedListOutlined,
+    FileTextOutlined,
+    DollarCircleOutlined,
 } from "@ant-design/icons-vue";
 import { debounce } from "lodash-es";
 import { useI18n } from "vue-i18n";
@@ -1205,6 +1204,7 @@ import { OrderSummary } from "../../../../common/components/product/style";
 import fields from "./fields";
 import ProductCardNew from "../../../../common/components/product/ProductCardNew.vue";
 import PayNow from "./PayNow.vue";
+import PosDrafts from "./PosDrafts.vue";
 import CustomerAddButton from "../../users/CustomerAddButton.vue";
 import InvoiceModal from "./Invoice.vue";
 import PosLayout1 from "./PosLayout1.vue";
@@ -1221,12 +1221,15 @@ export default {
         SettingOutlined,
         ShoppingCartOutlined,
         UnorderedListOutlined,
+        FileTextOutlined,
+        DollarCircleOutlined,
         PosLayout1,
         PosLayout2,
 
         ProductCardNew,
         OrderSummary,
         PayNow,
+        PosDrafts,
         CustomerAddButton,
         InvoiceModal,
     },
@@ -1241,6 +1244,9 @@ export default {
             formData,
             customerUrl,
             getPreFetchData,
+            fetchPosProducts,
+            productsHasMore,
+            productsLoading,
             posDefaultCustomer,
         } = fields();
 
@@ -1276,6 +1282,24 @@ export default {
 
         // Pay Now
         const payNowVisible = ref(false);
+        const draftsVisible = ref(false);
+        const currentDraftXid = ref(null);
+        const draftCount = ref(0);
+        const isCartReady = computed(() => {
+            return (
+                formData.value.subtotal > 0 &&
+                formData.value.user_id != undefined &&
+                formData.value.user_id != "" &&
+                !!formData.value.user_id
+            );
+        });
+
+        const fetchDraftCount = () => {
+            axiosAdmin.get("pos/drafts").then((response) => {
+                const drafts = response.data.drafts || [];
+                draftCount.value = drafts.length;
+            });
+        };
         const printInvoiceModalVisible = ref(false);
         const printInvoiceOrder = ref({});
 
@@ -1284,17 +1308,15 @@ export default {
 
         onMounted(() => {
             getPreFetchData();
+            fetchDraftCount();
         });
 
         const reFetchProducts = () => {
-            axiosAdmin
-                .post("pos/products", {
-                    brand_id: formData.value.brand_id,
-                    category_id: formData.value.category_id,
-                })
-                .then((productResponse) => {
-                    productLists.value = productResponse.data.products;
-                });
+            fetchPosProducts(false);
+        };
+
+        const loadMoreProducts = () => {
+            fetchPosProducts(true);
         };
 
         const fetchProducts = debounce((value) => {
@@ -1561,7 +1583,13 @@ export default {
         };
 
         const payNow = () => {
-            payNowVisible.value = true;
+            axiosAdmin
+                .post("pos/check-stock", {
+                    product_items: selectedProducts.value,
+                })
+                .then(() => {
+                    payNowVisible.value = true;
+                });
         };
 
         const payNowClosed = () => {
@@ -1571,6 +1599,7 @@ export default {
         const resetPos = () => {
             selectedProducts.value = [];
             selectedProductIds.value = [];
+            currentDraftXid.value = null;
 
             formData.value = {
                 ...formData.value,
@@ -1646,6 +1675,7 @@ export default {
 
             printInvoiceOrder.value = invoiceOrder;
             printInvoiceModalVisible.value = true;
+            fetchDraftCount();
         };
 
         const viewQuote = () => {
@@ -1667,6 +1697,75 @@ export default {
             });
         };
 
+        const saveDraft = () => {
+            const newFormDataObject = {
+                product_items: selectedProducts.value,
+                details: formData.value,
+                order_type: "pos-drafts",
+                draft_xid: currentDraftXid.value,
+            };
+
+            addEditRequestAdmin({
+                url: "pos/save",
+                data: newFormDataObject,
+                successMessage: t("stock.draft_saved"),
+                success: (res) => {
+                    resetPos();
+                    var walkInCustomerId =
+                        posDefaultCustomer.value && posDefaultCustomer.value.xid
+                            ? posDefaultCustomer.value.xid
+                            : undefined;
+                    formData.value = {
+                        ...formData.value,
+                        user_id: walkInCustomerId,
+                    };
+                    fetchDraftCount();
+                },
+            });
+        };
+
+        const draftRecalled = (payload) => {
+            const order = payload.order;
+            const products = payload.products || [];
+
+            currentDraftXid.value = order.unique_id;
+            selectedProducts.value = products;
+            selectedProductIds.value = products.map((product) => product.xid);
+
+            formData.value = {
+                ...formData.value,
+                user_id: order.x_user_id || formData.value.user_id,
+                tax_id: order.x_tax_id || undefined,
+                tax_rate: order.tax_rate || 0,
+                tax_amount: order.tax_amount || 0,
+                discount_type: "fixed",
+                discount_value: order.discount || 0,
+                discount: order.discount || 0,
+                shipping: order.shipping || 0,
+            };
+
+            recalculateFinalTotal();
+
+            const insufficient = products.filter((product) => {
+                return (
+                    product.product_type != "service" &&
+                    parseFloat(product.quantity) >
+                        parseFloat(product.stock_quantity)
+                );
+            });
+
+            if (insufficient.length > 0) {
+                const names = insufficient
+                    .map((product) => {
+                        return `${product.name} (available: ${product.stock_quantity}, required: ${product.quantity})`;
+                    })
+                    .join(", ");
+                message.error(
+                    `${t("stock.insufficient_stock")} ${names}`
+                );
+            }
+        };
+
         return {
             taxes,
             customers,
@@ -1675,12 +1774,21 @@ export default {
             productLists,
             formData,
             reFetchProducts,
+            loadMoreProducts,
+            productsHasMore,
+            productsLoading,
             selectSaleProduct,
 
             taxChanged,
             quantityChanged,
             recalculateFinalTotal,
             viewQuote,
+            saveDraft,
+            draftsVisible,
+            currentDraftXid,
+            draftCount,
+            isCartReady,
+            draftRecalled,
             // Pay Now
             payNow,
             payNowVisible,
@@ -1695,6 +1803,7 @@ export default {
             fetchProducts,
             searchValueSelected,
             selectedProducts,
+            selectedProductIds,
             orderItemColumns,
             formatAmount,
             formatAmountCurrency,
@@ -1739,18 +1848,69 @@ export default {
 .pos-header-extra {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
+}
+
+.pos-header-customer {
+    display: flex;
+    min-width: 180px;
 }
 
 .pos-header-warehouse {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
+    background: #f0f5ff;
+    color: #1d39c4;
+    border: 1px solid #adc6ff;
+    border-radius: 16px;
+    padding: 4px 12px;
 }
 
 .pos-header-date {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.65);
+}
+
+.pos-total-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1d39c4;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+
+    span {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    strong {
+        font-size: 20px;
+        font-weight: 700;
+    }
+}
+
+.pos-total-meta {
+    color: #7c8db5 !important;
+}
+
+.pos-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.pos-btn-pay {
+    font-weight: 600;
+}
+
+.pos-mobile-total {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 6px 10px 0;
 }
 
 .right-pos-sidebar .ps {
@@ -1872,5 +2032,12 @@ export default {
     background-color: white;
     text-align: center;
     border-top: 1px solid #e8e8e8;
+    padding: 8px;
+    z-index: 20;
+
+    .pos-action-bar {
+        justify-content: center;
+        margin-top: 6px;
+    }
 }
 </style>

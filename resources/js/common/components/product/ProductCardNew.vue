@@ -10,7 +10,12 @@
                     {{ $t("product.service") }}
                 </span>
                 <span v-else class="quantity-box" to="#">
-                    {{ product.stock_quantity }} {{ product.unit.short_name }}
+                    {{ product.stock_quantity }}
+                    {{
+                        product.unit && product.unit.short_name
+                            ? product.unit.short_name
+                            : product.unit_short_name
+                    }}
                 </span>
 
                 <img :src="product.image_url" class="img-fit" />

@@ -61,14 +61,14 @@
                                     @click="openAddForm"
                                 >
                                     <PlusOutlined />
-                                    {{ $t("payments.add") }}
+                                    {{ $t("payments.add_and_complete") }}
                                 </a-button>
                             </a-col>
                             <a-col :xs="24" :sm="24" :md="10" :lg="10">
                                 <a-button
                                     :loading="loading"
                                     :block="true"
-                                    @click="completeOrder"
+                                    @click="() => completeOrder()"
                                 >
                                     {{ $t("stock.complete_order") }}
                                     <RightOutlined />
@@ -232,13 +232,13 @@
                                     <a-button
                                         type="primary"
                                         :loading="loading"
-                                        @click="onSubmit"
+                                        @click="addAndComplete"
                                         block
                                     >
                                         <template #icon>
                                             <CheckOutlined />
                                         </template>
-                                        {{ $t("common.add") }}
+                                        {{ $t("payments.add_and_complete") }}
                                     </a-button>
                                 </a-col>
                             </a-row>
@@ -251,7 +251,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import {
     CheckOutlined,
     PlusOutlined,
@@ -260,12 +260,13 @@ import {
     DeleteOutlined,
 } from "@ant-design/icons-vue";
 import { useI18n } from "vue-i18n";
+import { message } from "ant-design-vue";
 import { find, filter, sumBy } from "lodash-es";
 import common from "../../../../common/composable/common";
 import apiAdmin from "../../../../common/composable/apiAdmin";
 
 export default {
-    props: ["visible", "data", "selectedProducts"],
+    props: ["visible", "data", "selectedProducts", "customers", "draftXid"],
     emits: ["closed", "success"],
     components: {
         CheckOutlined,
@@ -360,25 +361,105 @@ export default {
             });
         };
 
-        const completeOrder = () => {
-            const newFormDataObject = {
-                all_payments: allPaymentRecords.value,
-                product_items: props.selectedProducts,
-                details: props.data,
-            };
+        const totalEnteredAmount = computed(() => {
+            var allPaymentSum = sumBy(
+                allPaymentRecords.value,
+                (newPaymentAmount) => {
+                    return parseFloat(newPaymentAmount.amount);
+                }
+            );
 
-            addEditRequestAdmin({
-                url: "pos/save",
-                data: newFormDataObject,
-                successMessage: props.successMessage,
-                success: (res) => {
-                    resetPaymentForm();
+            return allPaymentSum + parseFloat(formData.value.amount);
+        });
 
-                    allPaymentRecords.value = [];
-                    showAddForm.value = false;
-                    emit("success", res.order);
-                },
+        const paidAmount = computed(() => {
+            return sumBy(allPaymentRecords.value, (newPaymentAmount) => {
+                return parseFloat(newPaymentAmount.amount) || 0;
             });
+        });
+
+        const isWalkInCustomer = computed(() => {
+            const userId = props.data && props.data.user_id;
+            if (!userId) {
+                return true;
+            }
+
+            const customer = find(props.customers || [], ["xid", userId]);
+            if (!customer) {
+                return false;
+            }
+
+            return (
+                customer.is_walkin_customer == 1 ||
+                customer.is_walkin_customer === true
+            );
+        });
+
+        const completeOrder = (payments = null) => {
+            const allPayments = Array.isArray(payments)
+                ? payments
+                : allPaymentRecords.value;
+            const paidTotal = sumBy(allPayments, (newPaymentAmount) => {
+                return parseFloat(newPaymentAmount.amount) || 0;
+            });
+
+            if (isWalkInCustomer.value && paidTotal <= 0) {
+                message.error(t("payments.walk_in_zero_payment"));
+                return;
+            }
+
+            axiosAdmin
+                .post("pos/check-stock", {
+                    product_items: props.selectedProducts,
+                })
+                .then(() => {
+                    const newFormDataObject = {
+                        all_payments: allPayments,
+                        product_items: props.selectedProducts,
+                        details: props.data,
+                        draft_xid: props.draftXid,
+                    };
+
+                    addEditRequestAdmin({
+                        url: "pos/save",
+                        data: newFormDataObject,
+                        successMessage: props.successMessage,
+                        success: (res) => {
+                            resetPaymentForm();
+
+                            allPaymentRecords.value = [];
+                            showAddForm.value = false;
+                            emit("success", res.order);
+                        },
+                    });
+                });
+        };
+
+        const addAndComplete = () => {
+            const currentAmount = parseFloat(formData.value.amount) || 0;
+            let payments = [...allPaymentRecords.value];
+
+            if (currentAmount > 0) {
+                if (!formData.value.payment_mode_id) {
+                    message.error(
+                        t("common.select_default_text", [
+                            t("payments.payment_mode"),
+                        ])
+                    );
+                    return;
+                }
+
+                payments = [
+                    ...payments,
+                    {
+                        ...formData.value,
+                        amount: currentAmount,
+                        id: Math.random().toString(36).slice(2),
+                    },
+                ];
+            }
+
+            completeOrder(payments);
         };
 
         const goBack = () => {
@@ -391,8 +472,21 @@ export default {
             if (!formData.value.payment_mode_id) {
                 formData.value.payment_mode_id = getDefaultPaymentModeId();
             }
+
+            const remaining =
+                parseFloat(props.data?.subtotal || 0) - paidAmount.value;
+            formData.value.amount = remaining > 0 ? remaining : 0;
             showAddForm.value = true;
         };
+
+        watch(
+            () => props.visible,
+            (isVisible) => {
+                if (isVisible) {
+                    openAddForm();
+                }
+            }
+        );
 
         const getPaymentModeName = (paymentId) => {
             var selectedMode = find(paymentModes.value, ["xid", paymentId]);
@@ -411,17 +505,6 @@ export default {
             allPaymentRecords.value = newResult;
         };
 
-        const totalEnteredAmount = computed(() => {
-            var allPaymentSum = sumBy(
-                allPaymentRecords.value,
-                (newPaymentAmount) => {
-                    return parseFloat(newPaymentAmount.amount);
-                }
-            );
-
-            return allPaymentSum + parseFloat(formData.value.amount);
-        });
-
         return {
             loading,
             rules,
@@ -431,6 +514,7 @@ export default {
             appSetting,
             formatAmountCurrency,
             onSubmit,
+            addAndComplete,
 
             allPaymentRecords,
             paymentRecordsColumns,
