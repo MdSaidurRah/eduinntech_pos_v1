@@ -831,7 +831,7 @@
 "en","messages","stmp_success_message","Your SMTP settings are correct.."
 "en","messages","stmp_error_message","Your SMTP settings are incorrect. Please update it to send mails"
 "en","messages","uploading_failed","Uploading failed"
-"en","messages","loading_app_message","Please wait... we are preparing something amazing for you"
+"en","messages","loading_app_message","Please wait...."
 "en","messages","fetching_product_details","We are fetching product details. Please wait..."
 "en","messages","product_is_upto_date","You are on the latest version of app."
 "en","messages","new_app_version_avaialbe","New app version {0} is available. Please update to get latest version."

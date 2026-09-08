@@ -58,7 +58,7 @@
                                 <a-button
                                     :block="true"
                                     type="primary"
-                                    @click="() => (showAddForm = true)"
+                                    @click="openAddForm"
                                 >
                                     <PlusOutlined />
                                     {{ $t("payments.add") }}
@@ -283,6 +283,30 @@ export default {
             amount: 0,
             notes: "",
         });
+
+        const getDefaultPaymentModeId = () => {
+            if (!paymentModes.value || paymentModes.value.length === 0) {
+                return undefined;
+            }
+
+            const cashMode = find(paymentModes.value, (mode) => {
+                const name = (mode.name || "").toLowerCase();
+                const type = (mode.mode_type || "").toLowerCase();
+                return name === "cash" || type === "cash";
+            });
+
+            return cashMode
+                ? cashMode.xid
+                : paymentModes.value[0].xid;
+        };
+
+        const resetPaymentForm = () => {
+            formData.value = {
+                payment_mode_id: getDefaultPaymentModeId(),
+                amount: 0,
+                notes: "",
+            };
+        };
         const { t } = useI18n();
         const allPaymentRecords = ref([]);
         const paymentRecordsColumns = ref([
@@ -304,15 +328,14 @@ export default {
         onMounted(() => {
             axiosAdmin.get("payment-modes").then((response) => {
                 paymentModes.value = response.data;
+                if (!formData.value.payment_mode_id) {
+                    formData.value.payment_mode_id = getDefaultPaymentModeId();
+                }
             });
         });
 
         const drawerClosed = () => {
-            formData.value = {
-                payment_mode_id: undefined,
-                amount: 0,
-                notes: "",
-            };
+            resetPaymentForm();
             allPaymentRecords.value = [];
             emit("closed");
         };
@@ -330,11 +353,7 @@ export default {
                         },
                     ];
 
-                    formData.value = {
-                        payment_mode_id: undefined,
-                        amount: 0,
-                        notes: "",
-                    };
+                    resetPaymentForm();
 
                     showAddForm.value = false;
                 },
@@ -353,11 +372,7 @@ export default {
                 data: newFormDataObject,
                 successMessage: props.successMessage,
                 success: (res) => {
-                    formData.value = {
-                        payment_mode_id: undefined,
-                        amount: 0,
-                        notes: "",
-                    };
+                    resetPaymentForm();
 
                     allPaymentRecords.value = [];
                     showAddForm.value = false;
@@ -367,13 +382,16 @@ export default {
         };
 
         const goBack = () => {
-            formData.value = {
-                payment_mode_id: undefined,
-                amount: 0,
-                notes: "",
-            };
+            resetPaymentForm();
 
             showAddForm.value = false;
+        };
+
+        const openAddForm = () => {
+            if (!formData.value.payment_mode_id) {
+                formData.value.payment_mode_id = getDefaultPaymentModeId();
+            }
+            showAddForm.value = true;
         };
 
         const getPaymentModeName = (paymentId) => {
@@ -419,6 +437,7 @@ export default {
             showAddForm,
             completeOrder,
             goBack,
+            openAddForm,
             getPaymentModeName,
             deletePayment,
             totalEnteredAmount,

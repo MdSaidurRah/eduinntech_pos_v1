@@ -1546,7 +1546,7 @@ class LangTrans
             'stmp_success_message' => 'Your SMTP settings are correct..',
             'stmp_error_message' => 'Your SMTP settings are incorrect. Please update it to send mails',
             'uploading_failed' => 'Uploading failed',
-            'loading_app_message' => 'Please wait... we are preparing something amazing for you',
+            'loading_app_message' => 'Please wait....',
             'fetching_product_details' => 'We are fetching product details. Please wait...',
             'product_is_upto_date' => 'You are on the latest version of app.',
             'new_app_version_avaialbe' => 'New app version {0} is available. Please update to get latest version.',

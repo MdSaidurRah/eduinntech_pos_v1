@@ -10,34 +10,52 @@
                     @back="() => $router.go(-1)"
                     class="p-0"
                 >
-                    <template v-if="innerWidth <= 768" #extra>
-                        <span style="display: flex">
-                            <a-select
-                                v-model:value="formData.user_id"
-                                :placeholder="$t('user.walk_in_customer')"
-                                style="width: 100%"
-                                optionFilterProp="title"
-                                show-search
+                    <template #extra>
+                        <span class="pos-header-extra">
+                            <span class="pos-header-date">
+                                {{ currentDate }}
+                            </span>
+                            <span
+                                v-if="innerWidth <= 768"
+                                style="display: flex"
                             >
-                                <a-select-option
-                                    v-for="customer in customers"
-                                    :key="customer.xid"
-                                    :title="customer.name"
-                                    :value="customer.xid"
+                                <a-select
+                                    v-model:value="formData.user_id"
+                                    :placeholder="$t('user.walk_in_customer')"
+                                    style="width: 100%"
+                                    optionFilterProp="title"
+                                    show-search
                                 >
-                                    {{ customer.name }}
-                                    <span
-                                        v-if="
-                                            customer.phone &&
-                                            customer.phone != ''
-                                        "
+                                    <a-select-option
+                                        v-for="customer in customers"
+                                        :key="customer.xid"
+                                        :title="customer.name"
+                                        :value="customer.xid"
                                     >
-                                        <br />
-                                        {{ customer.phone }}
-                                    </span>
-                                </a-select-option>
-                            </a-select>
-                            <CustomerAddButton @onAddSuccess="customerAdded" />
+                                        {{ customer.name }}
+                                        <span
+                                            v-if="
+                                                customer.phone &&
+                                                customer.phone != ''
+                                            "
+                                        >
+                                            <br />
+                                            {{ customer.phone }}
+                                        </span>
+                                    </a-select-option>
+                                </a-select>
+                                <CustomerAddButton
+                                    @onAddSuccess="customerAdded"
+                                />
+                            </span>
+                            <span
+                                v-if="
+                                    selectedWarehouse && selectedWarehouse.name
+                                "
+                                class="pos-header-warehouse"
+                            >
+                                {{ selectedWarehouse.name }}
+                            </span>
                         </span>
                     </template>
                 </a-page-header>
@@ -1239,10 +1257,13 @@ export default {
         const {
             formatAmount,
             formatAmountCurrency,
+            formatDate,
             appSetting,
             taxTypes,
             permsArray,
+            selectedWarehouse,
         } = common();
+        const currentDate = formatDate();
         const { addEditRequestAdmin, loading, rules } = apiAdmin();
         const { t } = useI18n();
 
@@ -1668,6 +1689,8 @@ export default {
 
             appSetting,
             permsArray,
+            selectedWarehouse,
+            currentDate,
             ...toRefs(state),
             fetchProducts,
             searchValueSelected,
@@ -1713,6 +1736,23 @@ export default {
 </script>
 
 <style lang="less">
+.pos-header-extra {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.pos-header-warehouse {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.pos-header-date {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
 .right-pos-sidebar .ps {
     height: calc(100vh - 90px);
 }
