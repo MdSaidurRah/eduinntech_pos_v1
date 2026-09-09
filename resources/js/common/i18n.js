@@ -1,8 +1,12 @@
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
+import bnMessages from './locales/bn.json';
 
-export function setupI18n(options = { locale: 'en', warnHtmlMessage: false }) {
-    const i18n = createI18n(options)
+export function setupI18n(options = { locale: 'en', fallbackLocale: 'en', warnHtmlMessage: false }) {
+    const i18n = createI18n({
+        fallbackLocale: 'en',
+        ...options,
+    })
     setI18nLanguage(i18n, options.locale)
     return i18n
 }
@@ -24,9 +28,14 @@ export function setI18nLanguage(i18n, locale) {
 }
 
 export async function loadLocaleMessages(i18n, locale) {
-    const res = await axiosBase.get('lang-trans');
+    try {
+        const res = await axiosBase.get('lang-trans');
+        setLangsLocaleMessage(res, i18n, locale);
+    } catch (error) {
+        setLangsLocaleMessage({ data: { data: [] } }, i18n, locale);
+    }
 
-    setLangsLocaleMessage(res, i18n, locale);
+    setI18nLanguage(i18n, locale);
 }
 
 export function setLangsLocaleMessage(res, i18n, locale) {
@@ -68,11 +77,19 @@ export function setLangsLocaleMessage(res, i18n, locale) {
     };
 
     const localeMessages = messages[locale] || {};
+    const overlay = locale === 'bn' ? bnMessages : {};
     const merged = { ...fallbacks };
-    Object.keys(localeMessages).forEach((group) => {
+    const groups = new Set([
+        ...Object.keys(localeMessages),
+        ...Object.keys(overlay),
+        ...Object.keys(fallbacks),
+    ]);
+
+    groups.forEach((group) => {
         merged[group] = {
             ...(fallbacks[group] || {}),
-            ...localeMessages[group],
+            ...(localeMessages[group] || {}),
+            ...(overlay[group] || {}),
         };
     });
 

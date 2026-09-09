@@ -1730,12 +1730,20 @@ class LangTrans
                         ->where('key', $transKey)
                         ->count();
 
+                    $value = $transValue;
+                    if ($allLang->key === 'bn') {
+                        $value = LangTransBn::auto((string) $transValue);
+                        if (isset(LangTransBn::$direct[$group][$transKey])) {
+                            $value = LangTransBn::$direct[$group][$transKey];
+                        }
+                    }
+
                     if ($translationCount == 0) {
                         $newTranslation = new Translation();
                         $newTranslation->lang_id = $allLang->id;
                         $newTranslation->group = $group;
                         $newTranslation->key = $transKey;
-                        $newTranslation->value = $transValue;
+                        $newTranslation->value = $value;
                         $newTranslation->save();
                     }
                 }

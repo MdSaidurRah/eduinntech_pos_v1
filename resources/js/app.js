@@ -31,7 +31,7 @@ async function bootstrap() {
 
     const app = createApp(App);
 
-    const i18n = setupI18n({ legacy: false, globalInjection: true, locale: store.state.auth.lang, warnHtmlMessage: false });
+    const i18n = setupI18n({ legacy: false, globalInjection: true, locale: store.state.auth.lang, fallbackLocale: 'en', warnHtmlMessage: false });
     await loadLocaleMessages(i18n, store.state.auth.lang);
 
     // app.config.devtools = true;

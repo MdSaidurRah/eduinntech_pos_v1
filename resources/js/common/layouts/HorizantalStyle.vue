@@ -17,8 +17,11 @@
 					<a-col :span="20">
 						<MainMenus />
 					</a-col>
-					<a-col :span="3">
-						<MenuMode />
+					<a-col :span="3" style="text-align: right">
+						<a-space>
+							<LanguageSwitch />
+							<MenuMode />
+						</a-space>
 					</a-col>
 				</a-row>
 			</a-layout-header>
@@ -39,6 +42,7 @@ import { Div, MainArea, MainContentArea, MainHeader } from "./style";
 import common from "../composable/common";
 import MainMenus from "./MainMenus.vue";
 import MenuMode from "./MenuMode.vue";
+import LanguageSwitch from "../components/LanguageSwitch.vue";
 
 export default {
 	components: {
@@ -49,7 +53,8 @@ export default {
 		MainMenus,
 		MainContentArea,
 		MainHeader,
-		MenuMode,
+        MenuMode,
+		LanguageSwitch,
 	},
 	setup() {
 		const { appSetting, cssSettings } = common();

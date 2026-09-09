@@ -1,5 +1,8 @@
 <template>
     <div class="login-main-container">
+        <div class="login-lang-switch">
+            <LanguageSwitch />
+        </div>
         <a-row class="main-container-div">
             <a-col :xs="24" :sm="24" :md="24" :lg="8">
                 <a-row class="login-left-div">
@@ -221,11 +224,13 @@ import { useRouter } from "vue-router";
 import common from "../../../common/composable/common";
 import apiAdmin from "../../../common/composable/apiAdmin";
 import DemoCredentials from "./DemoCredentials.vue";
+import LanguageSwitch from "../../../common/components/LanguageSwitch.vue";
 
 export default defineComponent({
     components: {
         DemoCredentials,
         ArrowLeftOutlined,
+        LanguageSwitch,
     },
     setup() {
         const { addEditRequestAdmin, loading, rules } = apiAdmin();
@@ -386,6 +391,14 @@ export default defineComponent({
 .login-main-container {
     background: #fff;
     height: 100vh;
+    position: relative;
+}
+
+.login-lang-switch {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
 }
 
 .main-container-div {

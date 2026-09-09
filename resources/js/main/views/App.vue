@@ -10,6 +10,7 @@
                             borderRadius: 4,
                         },
                     }"
+                    :locale="antdLocale"
                     :direction="appSetting.rtl ? 'rtl' : 'ltr'"
                 >
                     <div class="theme-container">
@@ -28,6 +29,8 @@
 <script>
 import { watch, onMounted, computed } from "vue";
 import { theme } from "ant-design-vue";
+import enUS from "ant-design-vue/es/locale/en_US";
+import bnBD from "ant-design-vue/es/locale/bn_BD";
 import { ThemeProvider } from "vue3-styled-components";
 import { themeVars } from "../config/theme/themeVariables";
 import { useRoute, useRouter } from "vue-router";
@@ -48,6 +51,9 @@ export default {
         const darkTheme = "dark";
         const { updatePageTitle, appSetting, frontWarehouse, appType } = common();
         const appChecking = computed(() => store.state.auth.appChecking);
+        const antdLocale = computed(() =>
+            store.state.auth.lang === "bn" ? bnBD : enUS
+        );
 
         onMounted(() => {
             // if (
@@ -104,6 +110,7 @@ export default {
             darkTheme,
             appChecking,
             appSetting,
+            antdLocale,
         };
     },
 };

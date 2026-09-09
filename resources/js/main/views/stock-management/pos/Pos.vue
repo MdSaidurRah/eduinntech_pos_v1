@@ -69,6 +69,7 @@
                             >
                                 {{ selectedWarehouse.name }}
                             </span>
+                            <LanguageSwitch />
                         </span>
                     </template>
                 </a-page-header>
@@ -1210,6 +1211,7 @@ import InvoiceModal from "./Invoice.vue";
 import PosLayout1 from "./PosLayout1.vue";
 import PosLayout2 from "./PosLayout2.vue";
 import apiAdmin from "../../../../common/composable/apiAdmin";
+import LanguageSwitch from "../../../../common/components/LanguageSwitch.vue";
 
 export default {
     components: {
@@ -1232,6 +1234,7 @@ export default {
         PosDrafts,
         CustomerAddButton,
         InvoiceModal,
+        LanguageSwitch,
     },
     setup() {
         const {

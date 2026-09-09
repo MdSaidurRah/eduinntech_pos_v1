@@ -29,6 +29,12 @@ class LangTableSeeder extends Seeder
 		$enLang->key = 'en';
 		$enLang->save();
 
+		$bnLang = new Lang();
+		$bnLang->name = 'বাংলা';
+		$bnLang->key = 'bn';
+		$bnLang->enabled = 1;
+		$bnLang->save();
+
 		LangTrans::seedMainTranslations();
 	}
 }

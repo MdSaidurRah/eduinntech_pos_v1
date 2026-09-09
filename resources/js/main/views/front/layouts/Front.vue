@@ -38,7 +38,10 @@
                             :xl="8"
                         >
                             <div :style="{ textAlign: 'right' }">
-                                <CheckoutDrawer @openLoginModal="openLoginModal" />
+                                <a-space>
+                                    <LanguageSwitch light />
+                                    <CheckoutDrawer @openLoginModal="openLoginModal" />
+                                </a-space>
                                 <Login
                                     :modalVisible="loginModalVisible"
                                     @modalClosed="loginModalClosed"
@@ -117,6 +120,7 @@ import CheckoutDrawer from "../components/CheckoutDrawer.vue";
 import Login from "../components/Login.vue";
 import LeftSidebar from "./LeftSidebar.vue";
 import LeftSidebarMenu from "./LeftSidebarMenu.vue";
+import LanguageSwitch from "../../../../common/components/LanguageSwitch.vue";
 
 export default defineComponent({
     components: {
@@ -129,6 +133,7 @@ export default defineComponent({
         Login,
         LeftSidebar,
         LeftSidebarMenu,
+        LanguageSwitch,
     },
     setup() {
         const store = useStore();
