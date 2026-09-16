@@ -11,7 +11,7 @@
         :trigger="null"
         :collapsed="menuCollapsed"
         :theme="appSetting.left_sidebar_theme"
-        class="sidebar-right-border"
+        class="sidebar-right-border admin-sidebar"
     >
         <div v-if="menuCollapsed" class="logo">
             <img
@@ -1285,6 +1285,27 @@ export default defineComponent({
 </script>
 
 <style lang="less">
+.admin-sidebar.ant-layout-sider-dark {
+    background: #0f172a !important;
+}
+
+.admin-sidebar.ant-layout-sider-dark .ant-menu.ant-menu-dark,
+.admin-sidebar.ant-layout-sider-dark .ant-menu-dark .ant-menu-sub {
+    background: #0f172a;
+}
+
+.admin-sidebar.ant-layout-sider-dark .ant-menu-dark .ant-menu-item-selected {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.admin-sidebar .ant-menu-item,
+.admin-sidebar .ant-menu-submenu-title {
+    border-radius: 8px;
+    margin-inline: 8px;
+    width: calc(100% - 16px);
+}
+
 .main-sidebar .ps {
     height: calc(100vh - 62px);
 }

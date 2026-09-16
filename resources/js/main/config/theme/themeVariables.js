@@ -1,10 +1,10 @@
-const primaryColor = '#5F63F2';
-const primaryHover = '#4347D9';
+const primaryColor = '#0f172a';
+const primaryHover = '#1e293b';
 const secondaryColor = '#FF69A5';
 const secondaryHover = '#E34A87';
-const linkColor = '#1890ff';
-const linkHover = '#0D79DF';
-const headingColor = 'rgba(0, 0, 0, 0.85)';
+const linkColor = '#2563eb';
+const linkHover = '#1d4ed8';
+const headingColor = '#0f172a';
 const successColor = '#20C997';
 const successHover = '#0CAB7C';
 const warningColor = '#FA8B0C';
@@ -13,10 +13,10 @@ const errorColor = '#f5222d';
 const errorHover = '#E30D0F';
 const infoColor = '#2C99FF';
 const infoHover = '#0D79DF';
-const darkColor = '#272B41';
-const darkHover = '#131623';
-const grayColor = '#5A5F7D';
-const grayHover = '#363A51';
+const darkColor = '#0f172a';
+const darkHover = '#020617';
+const grayColor = '#64748b';
+const grayHover = '#475569';
 const lightColor = '#9299B8';
 const lightHover = '#e2e6ea';
 const whiteColor = '#ffffff';
@@ -70,15 +70,15 @@ const themeVars = {
     'extra-light-color': extraLightColor, // info state color
     'danger-color': dangerColor,
     'danger-hover': dangerHover,
-    'font-family': "'Inter', sans-serif",
+    'font-family': "'Nunito', sans-serif",
     'font-size-base': '14px', // major text font size
     'heading-color': headingColor, // heading text color
     'text-color': darkColor, // major text color
     'text-color-secondary': grayColor, // secondary text color
     'disabled-color': 'rgba(0, 0, 0, 0.25)', // disable state color
-    'border-radius-base': '4px', // major border radius
-    'border-color-base': '#d9d9d9', // major border color
-    'box-shadow-base': '0 2px 8px rgba(0, 0, 0, 0.15)', // major shadow for layers
+    'border-radius-base': '8px', // major border radius
+    'border-color-base': '#e2e8f0', // major border color
+    'box-shadow-base': '0 12px 40px rgba(15, 23, 42, 0.08)', // major shadow for layers
     'border-color-light': borderColorLight,
     'border-color-normal': borderColorNormal,
     'border-color-deep': borderColorDeep,
@@ -98,17 +98,17 @@ const themeVars = {
     'card-background': '#ffffff',
     'card-head-padding': '16px',
     'card-padding-base': '12px',
-    'card-radius': '10px',
-    'card-shadow': '0 5px 20px rgba(146,153,184,0.03)',
+    'card-radius': '16px',
+    'card-shadow': '0 12px 40px rgba(15, 23, 42, 0.08)',
 
     // Layout
-    'layout-body-background': '#F4F5F7',
+    'layout-body-background': '#f4f6fb',
     'layout-header-background': '#ffffff',
     'layout-footer-background': '#fafafa',
     'layout-header-height': '64px',
     'layout-header-padding': '0 15px',
     'layout-footer-padding': '24px 15px',
-    'layout-sider-background': '#ffffff',
+    'layout-sider-background': '#0f172a',
     'layout-trigger-height': '48px',
     'layout-trigger-background': '#002140',
     'layout-trigger-color': '#fff',

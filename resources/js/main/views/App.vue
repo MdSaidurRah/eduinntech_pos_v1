@@ -7,13 +7,18 @@
                         token: {
                             colorPrimary: appSetting.primary_color,
                             fontFamily: 'Nunito,sans-serif',
-                            borderRadius: 4,
+                            borderRadius: 8,
+                            colorBgLayout: '#f4f6fb',
+                            colorText: '#0f172a',
+                            colorTextSecondary: '#64748b',
+                            colorBorder: '#e2e8f0',
+                            controlHeight: 36,
                         },
                     }"
                     :locale="antdLocale"
                     :direction="appSetting.rtl ? 'rtl' : 'ltr'"
                 >
-                    <div class="theme-container">
+                    <div class="theme-container" :class="themeClass">
                         <ThemeProvider :theme="{ ...themeVars }">
                             <LoadingApp v-if="appChecking" />
                             <component v-else :is="Component" />
@@ -54,6 +59,10 @@ export default {
         const antdLocale = computed(() =>
             store.state.auth.lang === "bn" ? bnBD : enUS
         );
+        const themeClass =
+            window.config && window.config.theme_mode === "dark"
+                ? "dark_theme"
+                : "light_theme";
 
         onMounted(() => {
             // if (
@@ -111,6 +120,7 @@ export default {
             appChecking,
             appSetting,
             antdLocale,
+            themeClass,
         };
     },
 };
@@ -118,6 +128,7 @@ export default {
 
 <style>
 body {
-    background: #f0f2f5 !important;
+    background: #f4f6fb !important;
+    color: #0f172a;
 }
 </style>

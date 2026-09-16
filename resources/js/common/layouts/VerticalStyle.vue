@@ -80,7 +80,7 @@ export default {
 }
 
 .site-layout-background {
-    background: #fff;
+    background: #f4f6fb;
 }
 
 [data-theme="dark"] .site-layout-sub-header-background {

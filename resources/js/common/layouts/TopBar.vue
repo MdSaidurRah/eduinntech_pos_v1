@@ -1,5 +1,5 @@
 <template>
-    <a-layout-header :style="{ padding: '0 16px', background: 'white' }">
+    <a-layout-header class="admin-topbar">
         <a-row>
             <a-col :span="4">
                 <a-space>
@@ -160,7 +160,15 @@ export default {
     transition: color 0.3s;
 }
 
+.admin-topbar.ant-layout-header {
+    padding: 0 20px;
+    height: 64px;
+    line-height: 64px;
+    background: #fff !important;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
+}
+
 .trigger:hover {
-    color: #1890ff;
+    color: #0f172a;
 }
 </style>

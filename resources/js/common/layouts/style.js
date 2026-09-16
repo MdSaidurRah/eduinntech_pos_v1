@@ -23,6 +23,7 @@ const MainArea = Styled("div", props)`
                 : "margin-left: 240px;"
             : ""}
 	min-height: 100vh;
+	background: #f4f6fb;
 `;
 
 const HeaderRightIcons = Styled("div", props)`
@@ -33,7 +34,7 @@ const HeaderRightIcons = Styled("div", props)`
 
 const MainHeader = Styled("div", props)`
 	.ant-layout-header, .ant-menu-horizontal{
-		background: #2e3f50 !important;
+		background: #0f172a !important;
 	}
 `;
 
@@ -62,7 +63,7 @@ const MainContentArea = Styled("div", props)`
 			margin: ${({ cssSettings }) =>
                 cssSettings && cssSettings.headerMenuMode == "horizontal"
                     ? "0px"
-                    : "0px 16px 0"};
+                    : "12px 20px 0"};
 		}
 	}
 
@@ -74,7 +75,7 @@ const MainContentArea = Styled("div", props)`
 		margin: ${({ cssSettings }) =>
             cssSettings && cssSettings.headerMenuMode == "horizontal"
                 ? "0px"
-                : "0px 16px 0"};
+                : "0px 20px 20px"};
 		${({ cssSettings }) =>
             cssSettings && cssSettings.headerMenuMode == "horizontal"
                 ? `border-top: 1px solid #cbd6e2`
@@ -107,8 +108,8 @@ const MainContentArea = Styled("div", props)`
 			margin: ${({ cssSettings }) =>
                 cssSettings && cssSettings.headerMenuMode == "horizontal"
                     ? "0px"
-                    : "0px 16px 0"};
-			padding-top: 30px;
+                    : "0px 20px 20px"};
+			padding-top: 24px;
 		}
 	}
 

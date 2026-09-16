@@ -1,5 +1,5 @@
 <template>
-    <a-card :bordered="false">
+    <a-card :bordered="false" class="admin-stat-card">
         <figure class="custom-card-widget">
             <a-space>
                 <div class="custom-card-widget-icon" :style="{ background: bgColor }">
@@ -17,7 +17,7 @@
 export default {
     props: {
         bgColor: {
-            default: "#5F63F2",
+            default: "#0f172a",
         },
     },
 };
